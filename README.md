@@ -17,7 +17,7 @@ A fully responsive Loan Calculator built with **React** and **Material UI**. Thi
 
 ## 🖥️ Demo
 
-> Live demo coming soon...
+loan-calculator-app-one.vercel.app
 
 ---
 
