@@ -1,22 +1,58 @@
 import React, { useState } from 'react';
-import { Container, Typography, Paper, TextField, Button, Grid, Switch } from '@mui/material';
+import {
+  Container,
+  Typography,
+  Paper,
+  Grid,
+  Switch,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Box,
+  Divider,
+} from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useGlobalContext } from '../context/GlobalContext';
 import { useEMICalculator } from '../hooks/useEMICalculator';
+import { useExchangeRates } from '../hooks/useExchangeRates';
+
+import EMIForm from '../components/EMIForm';
+import EMITable from '../components/EMITable';
 
 const Home = () => {
   const theme = useTheme();
   const { mode, toggleMode } = useGlobalContext();
 
-  const [principal, setPrincipal] = useState('');
-  const [rate, setRate] = useState('');
-  const [tenure, setTenure] = useState('');
   const [emi, setEmi] = useState(null);
+  const [schedule, setSchedule] = useState([]);
+  const [baseCurrency, setBaseCurrency] = useState('USD');
 
-  const calculateEMI = () => {
-    const result = useEMICalculator(Number(principal), Number(rate), Number(tenure));
-    setEmi(result);
+  const rates = useExchangeRates({ baseCurrency });
+
+  const handleCalculate = ({ principal, rate, duration }) => {
+    const R = rate / 12 / 100;
+    const emi = useEMICalculator(principal, rate, duration);
+    setEmi(emi);
+
+    const schedule = [];
+    let balance = principal;
+
+    for (let i = 0; i < duration; i++) {
+      const interest = balance * R;
+      const principalPaid = emi - interest;
+      balance -= principalPaid;
+      schedule.push({
+        principal: principalPaid,
+        interest: interest,
+        balance: balance > 0 ? balance : 0,
+      });
+    }
+
+    setSchedule(schedule);
   };
+
+  const displayCurrencies = ['USD', 'INR', 'EUR', 'GBP'];
 
   return (
     <Paper
@@ -24,7 +60,7 @@ const Home = () => {
         minHeight: '100vh',
         bgcolor: theme.palette.background.default,
         color: theme.palette.text.primary,
-        py: 4
+        py: 4,
       }}
     >
       <Container>
@@ -33,53 +69,48 @@ const Home = () => {
             Loan EMI Calculator
           </Typography>
           <Grid item>
-            <Typography component="span">Dark Mode</Typography>
-            <Switch checked={mode === 'dark'} onChange={toggleMode} />
           </Grid>
         </Grid>
 
-        <Grid container spacing={2} mt={2}>
-          <Grid item xs={12} sm={4}>
-            <TextField
-              label="Principal Amount"
-              fullWidth
-              type="number"
-              value={principal}
-              onChange={(e) => setPrincipal(e.target.value)}
-            />
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <TextField
-              label="Annual Interest Rate (%)"
-              fullWidth
-              type="number"
-              value={rate}
-              onChange={(e) => setRate(e.target.value)}
-            />
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <TextField
-              label="Loan Tenure (months)"
-              fullWidth
-              type="number"
-              value={tenure}
-              onChange={(e) => setTenure(e.target.value)}
-            />
-          </Grid>
-        </Grid>
-
-        <Button
-          variant="contained"
-          sx={{ mt: 3 }}
-          onClick={calculateEMI}
-        >
-          Calculate EMI
-        </Button>
+        <EMIForm onCalculate={handleCalculate} />
 
         {emi && (
-          <Typography variant="h6" mt={4}>
-            Monthly EMI: <strong>{emi}</strong>
-          </Typography>
+          <Box sx={{ mt: 4 }}>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Base Currency</InputLabel>
+                  <Select
+                    value={baseCurrency}
+                    label="Base Currency"
+                    onChange={(e) => setBaseCurrency(e.target.value)}
+                  >
+                    {['USD', 'INR', 'EUR', 'GBP', 'JPY'].map((cur) => (
+                      <MenuItem key={cur} value={cur}>
+                        {cur}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="h6">EMI in Various Currencies:</Typography>
+              {displayCurrencies.map((cur) => (
+                <Typography key={cur}>
+                  {cur}: {(emi * (rates[cur] || 1)).toFixed(2)}
+                </Typography>
+              ))}
+            </Box>
+
+            <Divider sx={{ my: 3 }} />
+
+            <Typography variant="h6" gutterBottom>
+              EMI Payment Schedule:
+            </Typography>
+            <EMITable schedule={schedule} />
+          </Box>
         )}
       </Container>
     </Paper>
@@ -87,77 +118,3 @@ const Home = () => {
 };
 
 export default Home;
-
-
-
-// import React, { useState } from 'react';
-// import { Button, TextField, Grid, Typography } from '@mui/material';
-// import ExchangeRates from './ExchangeRates';
-
-// const Home = () => {
-//   const [loanAmount, setLoanAmount] = useState('');
-//   const [interestRate, setInterestRate] = useState('');
-//   const [tenure, setTenure] = useState('');
-//   const [emiAmount, setEmiAmount] = useState(null);
-//   const [baseCurrency, setBaseCurrency] = useState('INR'); // Default base currency
-
-//   const calculateEMI = () => {
-//     const principal = parseFloat(loanAmount);
-//     const annualRate = parseFloat(interestRate);
-//     const months = parseInt(tenure);
-
-//     if (!principal || !annualRate || !months) return;
-
-//     const monthlyRate = annualRate / 12 / 100;
-//     const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
-//     setEmiAmount(emi.toFixed(2));
-//   };
-
-//   return (
-//     <Grid container spacing={3} sx={{ padding: '16px' }}>
-//       <Grid item xs={12} md={6}>
-//         <Typography variant="h4" gutterBottom>
-//           Loan EMI Calculator
-//         </Typography>
-//         <TextField
-//           label="Loan Amount"
-//           type="number"
-//           fullWidth
-//           value={loanAmount}
-//           onChange={(e) => setLoanAmount(e.target.value)}
-//         />
-//         <TextField
-//           label="Interest Rate (%)"
-//           type="number"
-//           fullWidth
-//           value={interestRate}
-//           onChange={(e) => setInterestRate(e.target.value)}
-//           sx={{ marginTop: '16px' }}
-//         />
-//         <TextField
-//           label="Tenure (months)"
-//           type="number"
-//           fullWidth
-//           value={tenure}
-//           onChange={(e) => setTenure(e.target.value)}
-//           sx={{ marginTop: '16px' }}
-//         />
-//         <Button variant="contained" color="primary" fullWidth sx={{ marginTop: '16px' }} onClick={calculateEMI}>
-//           Calculate EMI
-//         </Button>
-
-//         {emiAmount && (
-//           <Typography variant="h6" sx={{ marginTop: '16px' }}>
-//             Monthly EMI: ₹{emiAmount}
-//           </Typography>
-//         )}
-//       </Grid>
-
-//       <Grid item xs={12} md={6}>
-//         {emiAmount && <ExchangeRates baseCurrency={baseCurrency} emiAmount={emiAmount} />}
-//       </Grid>
-//     </Grid>
-//   );
-// };
-
-// export default Home;
