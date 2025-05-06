@@ -1,12 +1,35 @@
-# React + Vite
+# 💰 Loan Calculator App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A fully responsive Loan Calculator built with **React** and **Material UI**. This app allows users to input loan details and instantly view their monthly EMI (Equated Monthly Installment) along with real-time currency conversions using the **ExchangeRate API**.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## Expanding the ESLint configuration
+- 📊 **Loan Input**: Users can enter loan amount, interest rate, and loan tenure.
+- 🔄 **EMI Calculation**: Calculates monthly EMI using standard financial formulas.
+- 🌐 **Currency Conversion**: Converts EMI to 160+ currencies using real-time exchange rates.
+- 📱 **Responsive UI**: Clean, mobile-friendly interface using Material UI.
+- ⏳ **Loading and Error States**: Graceful handling of API latency and failures.
+- 📑 **Pagination**: View EMI values in different currencies in a paginated table.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 🖥️ Demo
+
+> Live demo coming soon...
+
+---
+
+## 🧪 Technologies Used
+
+- ⚛️ React
+- 💅 Material UI (MUI)
+- 🔗 Axios
+- 🌐 ExchangeRate API
+- 📦 Vite (or Create React App, based on your setup)
+
+---
+
+## 📂 Project Structure
+
